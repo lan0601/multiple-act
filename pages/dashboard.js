@@ -30,7 +30,7 @@ const Dashboard = () => {
         <h2 className="text-2xl font-bold">Welcome, {user.email}</h2>
 
         <div className="mt-4 flex flex-col gap-2">
-          <button className="bg-blue-500 text-white p-2 rounded" onClick={() => router.push("/secret-page-2")}>
+          {/* <button className="bg-blue-500 text-white p-2 rounded" onClick={() => router.push("/secret-page-2")}>
             Secret Page 2
           </button>
           <button className="bg-blue-500 text-white p-2 rounded" onClick={() => router.push("/secret-page-3")}>
@@ -38,7 +38,7 @@ const Dashboard = () => {
           </button>
           <button className="bg-red-500 text-white p-2 rounded" onClick={logout}>
             Logout
-          </button>
+          </button> */}
         </div>
       </div>
     </DashboardLayout>

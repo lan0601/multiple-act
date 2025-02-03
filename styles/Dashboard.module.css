@@ -1,0 +1,40 @@
+/* styles/sidebar.css */
+.sidebar {
+  width: 25%;
+  background-color: #222;
+  color: white;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100vh;
+}
+
+.sidebar h2 {
+  margin-bottom: 20px;
+}
+
+nav {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.nav-link {
+  display: block;
+  padding: 12px;
+  border-radius: 5px;
+  text-decoration: none;
+  text-align: center;
+  transition: background 0.3s ease;
+}
+
+.home { background-color: #333; color: #ddd; }
+.profile { background-color: #444; color: #ccc; }
+.settings { background-color: #555; color: #bbb; }
+
+.nav-link:hover {
+  background-color: #666;
+  color: white;
+}
