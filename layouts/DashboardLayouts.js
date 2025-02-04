@@ -8,8 +8,8 @@ export default function DashboardLayout({ children, logout, handleDeleteAccount,
     <div className={styles["dashboard-container"]}>
       {/* Sidebar */}
       <aside className={styles.sidebar}>
-        <h2>Dashboard</h2>
         <nav>
+          <a href="/dashboard" className={router.pathname === "/dashboard" ? styles.active : ""}>Dashboard</a>
           <a href="/activity-1" className={router.pathname === "/activity-1" ? styles.active : ""}>Activity 1</a>
           <a href="/activity-2" className={router.pathname === "/activity-2" ? styles.active : ""}>Activity 2</a>
           <a href="/activity-3" className={router.pathname === "/activity-3" ? styles.active : ""}>Activity 3</a>
