@@ -36,6 +36,7 @@
   color: #cbd5e1;
   font-size: 18px;
   padding: 10px;
+  margin-top: 10px;
   width: 100%;
   text-align: center;
   border-radius: 5px;
@@ -61,4 +62,11 @@
   flex-direction: column;
   gap: 10px;
   width: 100%;
+}
+
+/* Active link */
+.active {
+  background-color: #3b82f6; /* Blue background */
+  color: white;
+  font-weight: bold;
 }

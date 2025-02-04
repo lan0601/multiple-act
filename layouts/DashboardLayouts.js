@@ -1,25 +1,28 @@
+import { useRouter } from "next/router";
 import styles from "../styles/Dashboard.module.css"; // Adjust path if necessary
 
-export default function DashboardLayout({ children, logout, handleDeleteAccount, loading  }) {
+export default function DashboardLayout({ children, logout, handleDeleteAccount, loading }) {
+  const router = useRouter(); // Get current route
+
   return (
     <div className={styles["dashboard-container"]}>
       {/* Sidebar */}
       <aside className={styles.sidebar}>
         <h2>Dashboard</h2>
         <nav>
-          <a href="activity-1">Activity 1</a>
-          <a href="activity-2">Activity 2</a>
-          <a href="activity-3">Activity 3</a>
-          <a href="activity-4">Activity 4</a>
-          <a href="activity-5">Activity 5</a>
+          <a href="/activity-1" className={router.pathname === "/activity-1" ? styles.active : ""}>Activity 1</a>
+          <a href="/activity-2" className={router.pathname === "/activity-2" ? styles.active : ""}>Activity 2</a>
+          <a href="/activity-3" className={router.pathname === "/activity-3" ? styles.active : ""}>Activity 3</a>
+          <a href="/activity-4" className={router.pathname === "/activity-4" ? styles.active : ""}>Activity 4</a>
+          <a href="/activity-5" className={router.pathname === "/activity-5" ? styles.active : ""}>Activity 5</a>
         </nav>
+
+        {/* Logout and Delete Account at Bottom */}
         <div className={styles.bottomLinks}>
-        <button className="bg-red-500 text-white p-2 rounded" onClick={logout}>
+          <button onClick={logout}>
             Logout
           </button>
-          <button
-            className="bg-gray-700 text-white p-2 rounded"
-            onClick={handleDeleteAccount}
+          <button onClick={handleDeleteAccount}
             disabled={loading}
           >
             {loading ? "Deleting..." : "Delete Account"}
