@@ -1,25 +1,35 @@
-import styles from "@/styles/Dashboard.module.css";
+import styles from "../styles/Dashboard.module.css"; // Adjust path if necessary
 
-
-export default function DashboardLayout({ children }) {
+export default function DashboardLayout({ children, logout, handleDeleteAccount, loading  }) {
   return (
-    <div className="flex h-screen">
+    <div className={styles["dashboard-container"]}>
       {/* Sidebar */}
-      <aside className="w-1/4 bg-gray-900 text-white p-6 flex flex-col h-full justify-between">
-        <h2 className="text-xl font-bold">Dashboard</h2>
-        <nav className="flex flex-col gap-3 flex-grow justify-center">
-          <a href="#" className="p-3 bg-gray-800 text-gray-300 rounded hover:bg-gray-700 hover:text-white transition">Home</a>
-          <a href="#" className="p-3 bg-gray-700 text-gray-200 rounded hover:bg-gray-600 hover:text-white transition">Profile</a>
-          <a href="#" className="p-3 bg-gray-600 text-gray-100 rounded hover:bg-gray-500 hover:text-white transition">Settings</a>
+      <aside className={styles.sidebar}>
+        <h2>Dashboard</h2>
+        <nav>
+          <a href="activity-1">Activity 1</a>
+          <a href="activity-2">Activity 2</a>
+          <a href="activity-3">Activity 3</a>
+          <a href="activity-4">Activity 4</a>
+          <a href="activity-5">Activity 5</a>
         </nav>
+        <div className={styles.bottomLinks}>
+        <button className="bg-red-500 text-white p-2 rounded" onClick={logout}>
+            Logout
+          </button>
+          <button
+            className="bg-gray-700 text-white p-2 rounded"
+            onClick={handleDeleteAccount}
+            disabled={loading}
+          >
+            {loading ? "Deleting..." : "Delete Account"}
+          </button>
+        </div>
       </aside>
 
-
       {/* Main Content */}
-      <main className="flex-1 p-6 bg-gray-100 flex items-center justify-center">
-        <div className="bg-white p-6 rounded-lg shadow-lg w-3/4">
-          {children}
-        </div>
+      <main className={styles["main-content"]}>
+        <div>{children}</div>
       </main>
     </div>
   );

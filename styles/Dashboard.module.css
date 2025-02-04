@@ -1,40 +1,64 @@
-/* styles/sidebar.css */
+/* Dashboard.module.css */
+
+/* Layout */
+.dashboard-container {
+  display: flex;
+  height: 100vh;
+  background-color: #f4f4f4;
+}
+
+/* Sidebar */
 .sidebar {
-  width: 25%;
-  background-color: #222;
+  width: 250px;
+  background-color: #1e293b;
   color: white;
   padding: 20px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  height: 100vh;
+  align-items: center;
+  gap: 20px;
 }
 
 .sidebar h2 {
+  font-size: 24px;
+  font-weight: bold;
   margin-bottom: 20px;
 }
 
-nav {
+.sidebar nav {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.sidebar a {
+  text-decoration: none;
+  color: #cbd5e1;
+  font-size: 18px;
+  padding: 10px;
+  width: 100%;
+  text-align: center;
+  border-radius: 5px;
+  transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+}
+
+.sidebar a:hover {
+  background: #3b82f6;
+  color: white;
+}
+
+/* Main Content */
+.main-content {
+  flex-grow: 1;
+  padding: 30px;
+  background: white;
+  border-radius: 10px;
+  margin: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.bottomLinks {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin-top: auto;
-}
-
-.nav-link {
-  display: block;
-  padding: 12px;
-  border-radius: 5px;
-  text-decoration: none;
-  text-align: center;
-  transition: background 0.3s ease;
-}
-
-.home { background-color: #333; color: #ddd; }
-.profile { background-color: #444; color: #ccc; }
-.settings { background-color: #555; color: #bbb; }
-
-.nav-link:hover {
-  background-color: #666;
-  color: white;
+  width: 100%;
 }
