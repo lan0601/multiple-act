@@ -1,0 +1,31 @@
+/* Layout */
+.todocontainer {
+  width: 100%;
+  /* max-width: 800px; */
+  margin: 20px auto;
+  padding: 10px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.todoheader {
+  /* display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px; */
+  display: flex;
+  flex-wrap: wrap; /* Ensures responsiveness */
+  gap: 10px; /* Adds space between columns */
+}
+
+.addtaskbutton{
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.3s ease;
+}

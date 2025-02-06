@@ -3,9 +3,6 @@ import { useRouter } from "next/router";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../utils/auth";
 import DashboardLayout from "../layouts/DashboardLayouts"; // Adjust path based on your structure
-import styles from "../styles/Dashboard.module.css"; // Adjust path if necessary
-
-
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
@@ -54,46 +51,9 @@ const Dashboard = () => {
 
   return (
     <DashboardLayout logout={logout} handleDeleteAccount={handleDeleteAccount} loading={loading}>
-      <div className="container">
-        <div className="rows">
-          <div className="col-m6">1</div>
-          <div className="col-m6">2</div>
-          <h2>Todo List</h2>
-          <button children={styles.addtaskbutton}>Add Task</button>
-        </div>
-        <div>
-          <table>
-            <thead>
-              <tr>
-                <th>Task</th>
-                <th>Assigned User</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr></tr>
-              <tr></tr>
-              <tr></tr>
-              <tr></tr>
-              <tr></tr>
-              {/* {employees.map((emp) => (
-                <tr key={emp.id}>
-                  <td>{emp.name}</td>
-                  <td>{emp.position}</td>
-                  <td>${emp.salary}</td>
-                  <td>
-                    <button className="bg-blue-500 text-white p-1 mr-2" onClick={() => updateEmployee(emp.id, { position: "Updated Position" })}>
-                      Edit
-                    </button>
-                    <button className="bg-red-500 text-white p-1" onClick={() => deleteEmployee(emp.id)}>
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))} */}
-            </tbody>
-          </table>
-        </div>
+      <div className="p-6">
+        <h2 className="text-2xl font-bold">Welcome, {user.email}</h2>
+
       </div>
     </DashboardLayout>
   );

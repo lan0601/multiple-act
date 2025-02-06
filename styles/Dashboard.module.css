@@ -64,9 +64,8 @@
   width: 100%;
 }
 
-/* Active link */
 .active {
-  background-color: #3b82f6; /* Blue background */
+  background-color: #3b82f6;
   color: white;
   font-weight: bold;
 }
