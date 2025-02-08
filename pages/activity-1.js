@@ -144,7 +144,11 @@ const Dashboard = () => {
             <h2>Todo List</h2>
           </div>
           <div className="d-flex col-md-6 justify-content-end">
-            <button className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTaskModal">
+            <button className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTaskModal" onClick={() => {
+              setSelectedTask(null);  // Reset selectedTask
+              setTaskName("");  // Clear input field
+              setAssignedUser("");  // Clear dropdown
+            }}>
               Add Task
             </button>
           </div>
