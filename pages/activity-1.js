@@ -2,10 +2,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../utils/auth";
-import DashboardLayout from "../layouts/DashboardLayouts"; // Adjust path based on your structure
-import styles from "../styles/Dashboard.module.css"; // Adjust path if necessary
-
-
+import DashboardLayout from "../layouts/DashboardLayouts";
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
@@ -17,6 +14,7 @@ const Dashboard = () => {
   const [assignedUser, setAssignedUser] = useState("");
   const [emailOptions, setEmailOptions] = useState([]);
   const [tasks, setTasks] = useState([]);
+  const [selectedTask, setSelectedTask] = useState(null); // Track selected task
 
   useEffect(() => {
     const fetchSession = async () => {
@@ -27,33 +25,27 @@ const Dashboard = () => {
         router.push("/login");
       }
     };
-
     fetchSession();
   }, [router]);
 
   useEffect(() => {
     const fetchEmails = async () => {
       const { data, error } = await supabase.from("user_view").select("*");
-      if (error) {
-        console.error("Error fetching emails:", error);
-      } else {
-        setEmailOptions(data);
-      }
+      if (error) console.error("Error fetching emails:", error);
+      else setEmailOptions(data);
     };
     fetchEmails();
   }, []);
 
   useEffect(() => {
-    const fetchTasks = async () => {
-      const { data, error } = await supabase.from("todo").select("*");
-      if (error) {
-        console.error("Error fetching tasks:", error);
-      } else {
-        setTasks(data);
-      }
-    };
     fetchTasks();
   }, []);
+
+  const fetchTasks = async () => {
+    const { data, error } = await supabase.from("todo").select("*").order("id", { ascending: true });
+    if (error) console.error("Error fetching tasks:", error);
+    else setTasks(data);
+  };
 
   const handleDeleteAccount = async () => {
     if (window.confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
@@ -85,25 +77,60 @@ const Dashboard = () => {
       alert("Please fill in all fields");
       return;
     }
-  
+
     try {
-      const { data, error } = await supabase
-        .from("todo") // Change to your actual table name
-        .insert([{ task: taskName, assigned_id: assignedUser}]);
-  
-      if (error) throw error;
-  
-      alert("Task added successfully!");
+      if (selectedTask) {
+        // Update existing task
+        const { error } = await supabase
+          .from("todo")
+          .update({ task: taskName, assigned_id: assignedUser })
+          .eq("id", selectedTask.id);
+        if (error) throw error;
+        alert("Task updated successfully!");
+      } else {
+        // Add new task
+        const { error } = await supabase
+          .from("todo")
+          .insert([{ task: taskName, assigned_id: assignedUser }]);
+        if (error) throw error;
+        alert("Task added successfully!");
+      }
+
       setTaskName("");
       setAssignedUser("");
-  
-      // Close modal using Bootstrap’s modal function
+      setSelectedTask(null);
+      fetchTasks();
+
+      // Close modal
       const modal = document.getElementById("addTaskModal");
       const modalInstance = bootstrap.Modal.getInstance(modal);
       modalInstance.hide();
     } catch (error) {
-      console.error("Error adding task:", error.message);
-      alert("Failed to add task.");
+      console.error("Error submitting task:", error.message);
+      alert("Failed to submit task.");
+    }
+  };
+
+  const handleEditClick = (task) => {
+    setSelectedTask(task);
+    setTaskName(task.task);
+    setAssignedUser(task.assigned_id);
+
+    // Open modal
+    const modal = new bootstrap.Modal(document.getElementById("addTaskModal"));
+    modal.show();
+  };
+
+  const handleDeleteTask = async (taskId) => {
+    if (confirm("Are you sure you want to delete this task?")) {
+      const { error } = await supabase.from("todo").delete().eq("id", taskId);
+      if (error) {
+        console.error("Error deleting task:", error);
+        alert("Failed to delete task.");
+      } else {
+        alert("Task deleted successfully!");
+        fetchTasks();
+      }
     }
   };
 
@@ -122,41 +149,35 @@ const Dashboard = () => {
             </button>
           </div>
         </div>
-        <div>
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Task</th>
-                <th>Assigned User</th>
-                <th>Actions</th>
+        <table className="table">
+          <thead>
+            <tr>
+              <th>Task</th>
+              <th>Assigned User</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {tasks.map((task) => (
+              <tr key={task.id}>
+                <td>{task.task}</td>
+                <td>{task.assigned_id}</td>
+                <td>
+                  <button className="btn btn-warning me-2" onClick={() => handleEditClick(task)}>Edit</button>
+                  <button className="btn btn-danger" onClick={() => handleDeleteTask(task.id)}>Delete</button>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {/* {tasks.map((task) => (
-                <tr key={task.id}>
-                  <td>{task.task}</td>
-                  <td>{task.assigned_id}</td>
-                  <td>
-                    <button className="bg-blue-500 text-white p-1 mr-2" onClick={() => updateEmployee(task.id, { position: "Updated Position" })}>
-                      Edit
-                    </button>
-                    <button className="bg-red-500 text-white p-1" onClick={() => deleteEmployee(task.id)}>
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))} */}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
       </div>
 
-
+      {/* Modal */}
       <div className="modal fade" id="addTaskModal" tabIndex="-1" aria-labelledby="addTaskModalLabel" aria-hidden="true">
         <div className="modal-dialog">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title" id="addTaskModalLabel">Add Task</h5>
+              <h5 className="modal-title" id="addTaskModalLabel">{selectedTask ? "Edit Task" : "Add Task"}</h5>
               <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div className="modal-body">
@@ -167,25 +188,19 @@ const Dashboard = () => {
                 </div>
                 <div className="mb-3">
                   <label className="form-label">Assigned User</label>
-                  <select
-                    className="form-select"
-                    value={assignedUser}
-                    onChange={(e) => setAssignedUser(e.target.value)}
-                    required
-                  >
+                  <select className="form-select" value={assignedUser} onChange={(e) => setAssignedUser(e.target.value)} required>
                     <option value="">Select a user</option>
                     {emailOptions.map((email) => (
                       <option key={email.id} value={email.id}>{email.email}</option>
                     ))}
                   </select>
                 </div>
-                <button type="submit" className="btn btn-success">Add Task</button>
+                <button type="submit" className="btn btn-success">{selectedTask ? "Update Task" : "Add Task"}</button>
               </form>
             </div>
           </div>
         </div>
       </div>
-
     </DashboardLayout>
   );
 };
