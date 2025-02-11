@@ -14,7 +14,7 @@ const Dashboard = () => {
   const [assignedUser, setAssignedUser] = useState("");
   const [emailOptions, setEmailOptions] = useState([]);
   const [tasks, setTasks] = useState([]);
-  const [selectedTask, setSelectedTask] = useState(null); // Track selected task
+  const [selectedTask, setSelectedTask] = useState(null);
 
   useEffect(() => {
     const fetchSession = async () => {
