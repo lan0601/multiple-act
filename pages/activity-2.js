@@ -20,7 +20,6 @@ const Dashboard = () => {
   let userData;
 
   useEffect(() => {
-
     // showToast("Toast test message!", "success");
     const fetchSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -32,12 +31,18 @@ const Dashboard = () => {
         router.push("/login");
       }
     };
-
     fetchSession();
   }, [router]);
 
+  useEffect(() => {
+    if (user) {
+      fetchPhotos(); // Only fetch photos when user is available
+    }
+  }, [user]);
+
   const fetchPhotos = async () => {
-    const { data, error } = await supabase.from("photos").select("id, user_id, url").eq("user_id",userData.id);
+    if (!user) return;
+    const { data, error } = await supabase.from("photos").select("id, user_id, url").eq("user_id",user.id);
     if (error) {
       console.error("Error fetching photos:", error);
     } else {
@@ -47,6 +52,7 @@ const Dashboard = () => {
 
   const closeModal = async() => {
     // Close modal
+    alert('g')
     const modal = document.getElementById("uploadPhotoModal");
     const modalInstance = bootstrap.Modal.getInstance(modal);
     modalInstance.hide();
@@ -56,7 +62,7 @@ const Dashboard = () => {
     const file = e.target.files[0];
     if (file) {
       setSelectedFile(file);
-      setFileName(file.name.replace(/\.[^/.]+$/, "")); // Remove extension for editing
+      setFileName(file.name.replace(/\.[^/.]+$/, ""));
     }
   };
 
@@ -66,7 +72,7 @@ const Dashboard = () => {
     setLoading(true);
   
     const fileExt = selectedFile.name.split(".").pop();
-    const newFileName = `${fileName}.${fileExt}`; // Keep original extension
+    const newFileName = `${fileName}.${fileExt}`; 
     const filePath = `uploads/${user.id}/${newFileName}`;
   
     const { data: uploadData, error: uploadError } = await supabase.storage
@@ -77,7 +83,7 @@ const Dashboard = () => {
       console.error("Upload error:", uploadError);
       showToast("Failed to upload photo", "error");
       setLoading(false);
-      return; // Stop execution if upload fails
+      return; 
     }
   
     console.log("File uploaded at:", filePath);
@@ -92,17 +98,25 @@ const Dashboard = () => {
       .insert([{ user_id: user.id, url: publicURL }]);
   
     if (insertError) {
-      console.error("Error inserting photo:", insertError.message);
       showToast("Failed to save photo in database", "error");
     } else {
-      console.log("Photo inserted successfully");
       showToast("Photo uploaded successfully!", "success");
   
       // Reset fields and close modal
-      fetchPhotos(); // Refresh the photo list
-      setSelectedFile(null);
+      
+      // closeModal();
+      setTimeout(() => {
+        const modalElement = document.getElementById("uploadPhotoModal");
+        if (modalElement) {
+          modalElement.classList.remove("show");
+          modalElement.style.display = "none";
+          document.body.classList.remove("modal-open");
+          document.querySelector(".modal-backdrop")?.remove();
+        }
+      }, 300);
+      fetchPhotos();
+      setSelectedFile("");
       setFileName("");
-      closeModal(); // Make sure you have a function to close modal
     }
   
     setLoading(false);
@@ -139,7 +153,7 @@ const Dashboard = () => {
           toastElement.show();
         });
       }
-    }, 100); // Small delay to ensure UI updates
+    }, 1500); // Small delay to ensure UI updates
   };
 
   if (!user) return <p>Loading...</p>;
@@ -232,6 +246,7 @@ const Dashboard = () => {
             role="alert" 
             aria-live="assertive" 
             aria-atomic="true"
+            data-bs-delay="1000"
             data-bs-autohide="true"
           >
             <div className="d-flex">
