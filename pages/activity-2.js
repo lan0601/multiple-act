@@ -95,7 +95,7 @@ const Dashboard = () => {
     // Insert into database
     const { data: insertData, error: insertError } = await supabase
       .from("photos")
-      .insert([{ user_id: user.id, url: publicURL }]);
+      .insert([{ user_id: user.id, photo_name: fileName, url: publicURL }]);
   
     if (insertError) {
       showToast("Failed to save photo in database", "error");
@@ -122,6 +122,15 @@ const Dashboard = () => {
     setLoading(false);
   };
   
+  const handleEditClick = (task) => {
+    // setSelectedTask(task);
+    // setTaskName(task.task);
+    // setAssignedUser(task.assigned_id);
+
+    // Open modal
+    const modal = new bootstrap.Modal(document.getElementById("uploadPhotoModal"));
+    modal.show();
+  };
 
   const handleDelete = async (photoId, photoUrl) => {
     if (!window.confirm("Are you sure you want to delete this photo?")) return;
@@ -190,7 +199,7 @@ const Dashboard = () => {
                   <img src={photo.url} alt="Uploaded" className="photo-img" />
                 </div>
                 <div>
-                  <button className="btn btn-warning m-2" onClick={() => handleDelete(photo.id, photo.url)}>
+                  <button className="btn btn-warning m-2" onClick={() => handleEditClick(photo.id, photo.url)}>
                     Edit
                   </button>
                   <button className="btn btn-danger m-2" onClick={() => handleDelete(photo.id, photo.url)}>

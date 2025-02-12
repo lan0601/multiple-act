@@ -38,11 +38,13 @@ const Dashboard = () => {
   }, []);
 
   useEffect(() => {
-    fetchTasks();
-  }, []);
+    if (user) {
+      fetchTasks();
+    }
+  }, [user]);
 
   const fetchTasks = async () => {
-    const { data, error } = await supabase.from("todo").select("*").order("id", { ascending: true });
+    const { data, error } = await supabase.from("todo").select("*").eq("assigned_id",user.id).order("id", { ascending: true });
     if (error) console.error("Error fetching tasks:", error);
     else setTasks(data);
   };
