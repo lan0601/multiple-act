@@ -14,6 +14,7 @@ const Dashboard = () => {
   const [toastMessage, setToastMessage] = useState("");
   const [toastType, setToastType] = useState(""); // "success" or "error"
   const toastRef = useRef(null);
+  const [editingPhoto, setEditingPhoto] = useState(null);
 
   const router = useRouter();
   const { logout } = useAuth();
@@ -122,14 +123,47 @@ const Dashboard = () => {
     setLoading(false);
   };
   
-  const handleEditClick = (task) => {
+  const handleEditClick = (photo) => {
     // setSelectedTask(task);
     // setTaskName(task.task);
     // setAssignedUser(task.assigned_id);
+    setSelectedFile(null); // Prevent re-uploading
+    setFileName(photo.photo_name); // Set current name for editing
+    setEditingPhoto(photo); // Track the photo being edited
 
     // Open modal
     const modal = new bootstrap.Modal(document.getElementById("uploadPhotoModal"));
     modal.show();
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingPhoto || !fileName) return;
+    setLoading(true);
+  
+    const { error } = await supabase
+      .from("photos")
+      .update({ photo_name: fileName })
+      .eq("id", editingPhoto.id);
+  
+    if (error) {
+      showToast("Failed to update photo name", "error");
+    } else {
+      showToast("Photo name updated successfully!", "success");
+      fetchPhotos();
+    }
+  
+    setEditingPhoto(null);
+    setLoading(false);
+  
+    setTimeout(() => {
+      const modalElement = document.getElementById("uploadPhotoModal");
+      if (modalElement) {
+        modalElement.classList.remove("show");
+        modalElement.style.display = "none";
+        document.body.classList.remove("modal-open");
+        document.querySelector(".modal-backdrop")?.remove();
+      }
+    }, 300);
   };
 
   const handleDelete = async (photoId, photoUrl) => {
@@ -199,7 +233,7 @@ const Dashboard = () => {
                   <img src={photo.url} alt="Uploaded" className="photo-img" />
                 </div>
                 <div>
-                  <button className="btn btn-warning m-2" onClick={() => handleEditClick(photo.id, photo.url)}>
+                  <button className="btn btn-warning m-2" onClick={() => handleEditClick(photo.id,photo.photo_name, photo.url)}>
                     Edit
                   </button>
                   <button className="btn btn-danger m-2" onClick={() => handleDelete(photo.id, photo.url)}>
@@ -239,8 +273,11 @@ const Dashboard = () => {
                 <button className="btn btn-secondary" data-bs-dismiss="modal">
                   Cancel
                 </button>
-                <button className="btn btn-primary" onClick={handleUpload} disabled={loading || !selectedFile}>
+                {/* <button className="btn btn-primary" onClick={handleUpload} disabled={loading || !selectedFile}>
                   {loading ? "Uploading..." : "Upload"}
+                </button> */}
+                <button className="btn btn-primary" onClick={editingPhoto ? handleSaveEdit : handleUpload} disabled={loading || (!selectedFile && !editingPhoto)}>
+                  {loading ? "Processing..." : editingPhoto ? "Save" : "Upload"}
                 </button>
               </div>
             </div>
