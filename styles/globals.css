@@ -66,6 +66,33 @@ table tr:hover {
   background-color: #f1f1f1;
 }
 
+.photo-gallery-container {
+  max-height: calc(100vh - 150px); 
+  overflow-y: auto; 
+  overflow-x: hidden; 
+  padding-right: 10px;
+}
+
+.photo-container {
+  width: 100%;
+  max-width: 250px;
+  height: 250px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f3f3f3;
+  border-radius: 8px; 
+  overflow: hidden; 
+}
+
+.photo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+
 @media (prefers-color-scheme: dark) {
   html {
     color-scheme: dark;

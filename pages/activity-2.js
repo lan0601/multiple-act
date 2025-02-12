@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../utils/auth";
 import DashboardLayout from "../layouts/DashboardLayouts";
+// import { Toast } from "bootstrap";
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
@@ -16,12 +17,16 @@ const Dashboard = () => {
 
   const router = useRouter();
   const { logout } = useAuth();
+  let userData;
 
   useEffect(() => {
+
+    // showToast("Toast test message!", "success");
     const fetchSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         setUser(session.user);
+        userData=session.user;
         fetchPhotos();
       } else {
         router.push("/login");
@@ -32,13 +37,20 @@ const Dashboard = () => {
   }, [router]);
 
   const fetchPhotos = async () => {
-    const { data, error } = await supabase.from("photos").select("id, url");
+    const { data, error } = await supabase.from("photos").select("id, user_id, url").eq("user_id",userData.id);
     if (error) {
       console.error("Error fetching photos:", error);
     } else {
       setPhotos(data);
     }
   };
+
+  const closeModal = async() => {
+    // Close modal
+    const modal = document.getElementById("uploadPhotoModal");
+    const modalInstance = bootstrap.Modal.getInstance(modal);
+    modalInstance.hide();
+  }
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -52,31 +64,50 @@ const Dashboard = () => {
     e.preventDefault();
     if (!selectedFile || !fileName) return;
     setLoading(true);
-
-    const fileExt = selectedFile.name.split('.').pop();
+  
+    const fileExt = selectedFile.name.split(".").pop();
     const newFileName = `${fileName}.${fileExt}`; // Keep original extension
     const filePath = `uploads/${user.id}/${newFileName}`;
-
-    const { data, error } = await supabase.storage.from("photos").upload(filePath, selectedFile);
-    
-    if (error) {
-      console.error("Upload error:", error);
+  
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from("photos")
+      .upload(filePath, selectedFile);
+  
+    if (uploadError) {
+      console.error("Upload error:", uploadError);
       showToast("Failed to upload photo", "error");
+      setLoading(false);
+      return; // Stop execution if upload fails
+    }
+  
+    console.log("File uploaded at:", filePath);
+  
+    // Get public URL
+    const { data } = supabase.storage.from("photos").getPublicUrl(filePath);
+    const publicURL = data.publicUrl;
+  
+    // Insert into database
+    const { data: insertData, error: insertError } = await supabase
+      .from("photos")
+      .insert([{ user_id: user.id, url: publicURL }]);
+  
+    if (insertError) {
+      console.error("Error inserting photo:", insertError.message);
+      showToast("Failed to save photo in database", "error");
     } else {
-      const { publicURL } = supabase.storage.from("photos").getPublicUrl(filePath);
-      console.log(publicURL);
-      console.log(filePath);
-      await supabase.from("photos").insert([{ user_id: user.id, url: publicURL }]);
-      fetchPhotos();
+      console.log("Photo inserted successfully");
       showToast("Photo uploaded successfully!", "success");
-
-      // Reset fields after successful upload
+  
+      // Reset fields and close modal
+      fetchPhotos(); // Refresh the photo list
       setSelectedFile(null);
       setFileName("");
+      closeModal(); // Make sure you have a function to close modal
     }
-
+  
     setLoading(false);
   };
+  
 
   const handleDelete = async (photoId, photoUrl) => {
     if (!window.confirm("Are you sure you want to delete this photo?")) return;
@@ -100,8 +131,15 @@ const Dashboard = () => {
   const showToast = (message, type) => {
     setToastMessage(message);
     setToastType(type);
-    const toast = new bootstrap.Toast(toastRef.current);
-    toast.show();
+  
+    setTimeout(() => {
+      if (toastRef.current) {
+        import("bootstrap").then((bootstrap) => {
+          const toastElement = new bootstrap.Toast(toastRef.current);
+          toastElement.show();
+        });
+      }
+    }, 100); // Small delay to ensure UI updates
   };
 
   if (!user) return <p>Loading...</p>;
@@ -130,16 +168,27 @@ const Dashboard = () => {
         </div>
 
         {/* Photo Grid */}
-        <div className="row mt-3">
-          {photos.map((photo) => (
-            <div key={photo.id} className="col-md-4">
-              <img src={photo.url} alt="Uploaded" className="img-fluid" />
-              <button className="btn btn-danger mt-2" onClick={() => handleDelete(photo.id, photo.url)}>
-                Delete
-              </button>
-            </div>
-          ))}
+        <div className="photo-gallery-container">
+          <div className="row mt-3">
+            {photos.map((photo) => (
+              <div key={photo.id} className="col-md-4 d-flex flex-column align-items-center">
+                <div className="photo-container">
+                  <img src={photo.url} alt="Uploaded" className="photo-img" />
+                </div>
+                <div>
+                  <button className="btn btn-warning m-2" onClick={() => handleDelete(photo.id, photo.url)}>
+                    Edit
+                  </button>
+                  <button className="btn btn-danger m-2" onClick={() => handleDelete(photo.id, photo.url)}>
+                    Delete
+                  </button>
+                </div>
+                
+              </div>
+            ))}
+          </div>
         </div>
+        
 
         {/* Bootstrap Modal for Uploading */}
         <div className="modal fade" id="uploadPhotoModal" tabIndex="-1" aria-labelledby="uploadPhotoModalLabel" aria-hidden="true">
@@ -179,10 +228,11 @@ const Dashboard = () => {
         <div className="toast-container position-fixed top-0 end-0 p-3">
           <div 
             ref={toastRef} 
-            className={`toast align-items-center text-white bg-${toastType === "success" ? "success" : "danger"} border-0`} 
+            className={`toast align-items-center text-white bg-${toastType === "success" ? "success" : "danger"} border-0`}
             role="alert" 
             aria-live="assertive" 
             aria-atomic="true"
+            data-bs-autohide="true"
           >
             <div className="d-flex">
               <div className="toast-body">
@@ -192,6 +242,7 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
+
       </div>
     </DashboardLayout>
   );
