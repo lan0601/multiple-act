@@ -43,7 +43,7 @@ const Dashboard = () => {
 
   const fetchPhotos = async () => {
     if (!user) return;
-    const { data, error } = await supabase.from("photos").select("id, user_id, url").eq("user_id",user.id);
+    const { data, error } = await supabase.from("photos").select("*").eq("user_id",user.id);
     if (error) {
       console.error("Error fetching photos:", error);
     } else {
@@ -124,15 +124,12 @@ const Dashboard = () => {
   };
   
   const handleEditClick = (photo) => {
-    // setSelectedTask(task);
-    // setTaskName(task.task);
-    // setAssignedUser(task.assigned_id);
-    setSelectedFile(null); // Prevent re-uploading
+    console.log(photo);
     setFileName(photo.photo_name); // Set current name for editing
     setEditingPhoto(photo); // Track the photo being edited
-
+  
     // Open modal
-    const modal = new bootstrap.Modal(document.getElementById("uploadPhotoModal"));
+    const modal = new bootstrap.Modal(document.getElementById("editPhotoModal"));
     modal.show();
   };
 
@@ -156,7 +153,7 @@ const Dashboard = () => {
     setLoading(false);
   
     setTimeout(() => {
-      const modalElement = document.getElementById("uploadPhotoModal");
+      const modalElement = document.getElementById("editPhotoModal");
       if (modalElement) {
         modalElement.classList.remove("show");
         modalElement.style.display = "none";
@@ -169,8 +166,10 @@ const Dashboard = () => {
   const handleDelete = async (photoId, photoUrl) => {
     if (!window.confirm("Are you sure you want to delete this photo?")) return;
     setLoading(true);
+    console.log(photoId, photoUrl);
 
-    const filePath = photoUrl.split("/o/")[1].split("?")[0];
+
+    const filePath = photoUrl.replace(/^.*public\//, "");
     const { error: storageError } = await supabase.storage.from("photos").remove([filePath]);
     
     if (storageError) {
@@ -233,8 +232,8 @@ const Dashboard = () => {
                   <img src={photo.url} alt="Uploaded" className="photo-img" />
                 </div>
                 <div>
-                  <button className="btn btn-warning m-2" onClick={() => handleEditClick(photo.id,photo.photo_name, photo.url)}>
-                    Edit
+                  <button className="btn btn-warning m-2" onClick={() => handleEditClick(photo)}>
+                    Rename
                   </button>
                   <button className="btn btn-danger m-2" onClick={() => handleDelete(photo.id, photo.url)}>
                     Delete
@@ -258,6 +257,43 @@ const Dashboard = () => {
               <div className="modal-body">
                 <input type="file" onChange={handleFileChange} className="form-control mb-3" />
                 {selectedFile && (
+                  <>
+                    <label>Photo Name:</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={fileName}
+                      onChange={(e) => setFileName(e.target.value)}
+                    />
+                  </>
+                )}
+              </div>
+              <div className="modal-footer">
+                <button className="btn btn-secondary" data-bs-dismiss="modal">
+                  Cancel
+                </button>
+                {/* <button className="btn btn-primary" onClick={handleUpload} disabled={loading || !selectedFile}>
+                  {loading ? "Uploading..." : "Upload"}
+                </button> */}
+                <button className="btn btn-primary" onClick={editingPhoto ? handleSaveEdit : handleUpload} disabled={loading || (!selectedFile && !editingPhoto)}>
+                  {loading ? "Processing..." : editingPhoto ? "Save" : "Upload"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Modal for editing photo  */}
+        <div className="modal fade" id="editPhotoModal" tabIndex="-1" aria-labelledby="editPhotoModalLabel" aria-hidden="true">
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title" id="editPhotoModalLabel">Edit</h5>
+                <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div className="modal-body">
+                {/* <input type="file" onChange={handleFileChange} className="form-control mb-3" /> */}
+                {(
                   <>
                     <label>Photo Name:</label>
                     <input
